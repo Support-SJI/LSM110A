@@ -53,7 +53,10 @@ extern "C"
 #endif
 
 #include "Region.h"
+#include "stm32_adv_trace.h"
 
+
+#define AS923_PRINTF(...)     do{  UTIL_ADV_TRACE_COND_FSend(VLEVEL_OFF, T_REG_OFF, TS_OFF, __VA_ARGS__);}while(0)
 /*!
  * Channel plan group AS923-1
  * AS923_FREQ_OFFSET = 0
@@ -86,7 +89,7 @@ extern "C"
 /*!
  * Number of default channels
  */
-#define AS923_NUMB_DEFAULT_CHANNELS                 2
+#define AS923_NUMB_DEFAULT_CHANNELS                 4			//2 -> 4
 
 /*!
  * Number of channels to apply for the CF list
@@ -255,6 +258,7 @@ extern "C"
  */
 #define AS923_BAND0                                 { 100, AS923_MAX_TX_POWER, 0, 0, 0, 0, 0 } //  1.0 %
 
+
 /*!
  * LoRaMac default channel 1
  * Channel = { Frequency [Hz], RX1 Frequency [Hz], { ( ( DrMax << 4 ) | DrMin ) }, Band }
@@ -266,6 +270,20 @@ extern "C"
  * Channel = { Frequency [Hz], RX1 Frequency [Hz], { ( ( DrMax << 4 ) | DrMin ) }, Band }
  */
 #define AS923_LC2                                   { 923400000, 0, { ( ( DR_5 << 4 ) | DR_0 ) }, 0 }
+
+
+//ysjung add
+/*!
+ * LoRaMac default channel 3
+ * Channel = { Frequency [Hz], RX1 Frequency [Hz], { ( ( DrMax << 4 ) | DrMin ) }, Band }
+ */
+#define AS923_LC3                                   { 922100000, 0, { ( ( DR_6 << 4 ) | DR_6 ) }, 0 }
+
+/*!
+ * LoRaMac default channel 4
+ * Channel = { Frequency [Hz], RX1 Frequency [Hz], { ( ( DrMax << 4 ) | DrMin ) }, Band }
+ */
+#define AS923_LC4                                   { 921800000, 0, { ( ( DR_7 << 4 ) | DR_7 ) }, 0 }
 
 /*!
  * LoRaMac channels which are allowed for the join procedure
@@ -578,6 +596,14 @@ uint8_t RegionAS923ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
  * \param [out] outDr Datarate used to receive the beacon
  */
  void RegionAS923RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr );
+ 
+/*!
+ * \brief AS923 sub channal setting (by.HBJ)
+ *
+ * \param [in] select sub channal
+ *
+ */ 
+ uint8_t AS923_sub_band_setting (LoRaRegion_AS923_sub_band_t band);
 
 /*! \} defgroup REGIONAS923 */
 

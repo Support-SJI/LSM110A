@@ -50,7 +50,6 @@ extern "C" {
 
 #define USER_EKY							1
 
-
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 

@@ -341,6 +341,12 @@ LoRaMacCryptoStatus_t LoRaMacCryptoDeriveMcSessionKeyPair( AddressIdentifier_t a
 extern uint16_t E2P_LORA_Read_DevNonce(void);
 extern void E2P_LORA_Write_DevNonce(uint16_t DevNonce);
 
+extern uint32_t E2P_LORA_Read_ABP_Fcnt(void);
+extern void E2P_LORA_Write_ABP_Fcnt(uint32_t Fcnt);
+
+extern uint32_t E2P_LORA_Read_ABP_High16bit_DL_Fcnt(void);
+extern void E2P_LORA_Write_ABP_High16bit_DL_Fcnt(uint32_t Fcnt);
+
 /*! \} addtogroup LORAMAC */
 
 #ifdef __cplusplus

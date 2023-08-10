@@ -115,8 +115,10 @@ typedef enum eATEerror
 #define AT_PGSLOT     "+PGSLOT"
 #define AT_NWKTYPE    "+NWKTYPE"
 #define AT_DEVNONCE   "+DEVNONCE"
+#define AT_ABPFCNT   	  "+ABPFCNT"
 #define AT_CONFIRMRETRANS   "+CNFRETX"
 #define AT_UNCONFIRMRETRANS "+UNCNFRETX"
+#define AT_CHANNELMASK	  "+CHMASK"
 
 /* Radio tests commands */
 #define AT_TTONE      "+TTONE"
@@ -136,11 +138,13 @@ typedef enum eATEerror
 #define AT_PSEND  	  "+PSEND"
 #define AT_PRECV  	  "+PRECV"
 
+
 /* Information command */
 #define AT_BAT        "+BAT"
 #define AT_MODE       "+MODE"
 #define AT_FW         "+FW"
 #define AT_SSWVER     "$SSWVER"
+
 
 /* gpio_test command by.HBJ*/
 #define AT_IO        "+IO"
@@ -611,6 +615,20 @@ ATEerror_t AT_DevNonce_get(const char *param);
 ATEerror_t AT_DevNonce_set(const char *param);
 
 /**
+  * @brief  get the ABP Frame count
+  * @retval AT_OK
+  * @param  param String parameter to join devnonce
+  */
+ATEerror_t AT_ABP_Fcnt_get(const char *param);
+
+/**
+  * @brief  Set the ABP Frame count
+  * @param  param String parameter to join devnonce 
+  * @retval AT_OK
+  */
+ATEerror_t AT_ABP_Fcnt_set(const char *param);
+
+/**
   * @brief  Get the Confirmed Retransmission NbTrans
   * @param  param String parameter to Confirmed_Retransmission 
   * @retval AT_OK
@@ -637,6 +655,10 @@ ATEerror_t AT_Unconfirmed_Retransmission_get(const char *param);
   * @retval AT_OK
   */
 ATEerror_t AT_Unconfirmed_Retransmission_set(const char *param);
+
+
+ATEerror_t AT_channel_mask_set(const char *param);
+
 
 
 /* --------------- Radio tests commands --------------- */

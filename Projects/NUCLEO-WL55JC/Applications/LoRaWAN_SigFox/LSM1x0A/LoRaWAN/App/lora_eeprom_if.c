@@ -153,8 +153,13 @@ void E2P_LORA_RestoreFs(void)
   E2P_LORA_Write(EE_LORA_DEVNONCE_ID, 0);
   E2P_LORA_Write(EE_LORA_CONFIRMNBTRANS_ID, 1);
   E2P_LORA_Write(EE_LORA_UNCONFIRMNBTRANS_ID, 1);
-
+  E2P_LORA_Write(EE_LORA_ABP_FCNT_ID, 0);
+  E2P_LORA_Write(EE_LORA_ABP_HIGH16BIT_FCNT_ID, 0);
   HAL_FLASH_Lock();
+	
+	uint32_t UDN = LL_FLASH_GetUDN();
+	E2P_LORA_Write_DevAddr((uint8_t*)&UDN);
+	
   /* USER CODE BEGIN E2P_RestoreFs_2 */
 
   /* USER CODE END E2P_RestoreFs_2 */
@@ -303,6 +308,63 @@ void E2P_LORA_Write_DevNonce(uint16_t DevNonce)
   /* USER CODE END E2P_Write_DevNonce_2 */
 }
 
+uint32_t E2P_LORA_Read_ABP_Fcnt(void)
+{
+  /* USER CODE BEGIN E2P_Read_ABP_Fcnt_1 */
+
+  /* USER CODE END E2P_Read_ABP_Fcnt_1 */
+  uint32_t Fcnt = 0;
+  E2P_LORA_Read(EE_LORA_ABP_FCNT_ID, &Fcnt);
+  return Fcnt;
+  /* USER CODE BEGIN E2P_Read_ABP_Fcnt_2 */
+
+  /* USER CODE END E2P_Read_ABP_Fcnt_2 */
+}
+
+void E2P_LORA_Write_ABP_Fcnt(uint32_t Fcnt)
+{
+  /* USER CODE BEGIN E2P_Write_ABP_Fcnt_1 */
+
+  /* USER CODE END E2P_Write_ABP_Fcnt_1 */
+  HAL_FLASH_Unlock();
+
+  E2P_LORA_Write(EE_LORA_ABP_FCNT_ID, Fcnt);
+
+  HAL_FLASH_Lock();
+  /* USER CODE BEGIN E2P_Write_ABP_Fcnt_2 */
+
+  /* USER CODE END E2P_Write_ABP_Fcnt_2 */
+}
+
+uint32_t E2P_LORA_Read_ABP_High16bit_DL_Fcnt(void)
+{
+  /* USER CODE BEGIN E2P_Read_ABP_Fcnt_1 */
+
+  /* USER CODE END E2P_Read_ABP_Fcnt_1 */
+  uint32_t Fcnt = 0;
+  E2P_LORA_Read(EE_LORA_ABP_HIGH16BIT_FCNT_ID, &Fcnt);
+  return Fcnt;
+  /* USER CODE BEGIN E2P_Read_ABP_Fcnt_2 */
+
+  /* USER CODE END E2P_Read_ABP_Fcnt_2 */
+}
+
+void E2P_LORA_Write_ABP_High16bit_DL_Fcnt(uint32_t Fcnt)
+{
+  /* USER CODE BEGIN E2P_Write_ABP_Fcnt_1 */
+
+  /* USER CODE END E2P_Write_ABP_Fcnt_1 */
+  HAL_FLASH_Unlock();
+
+  E2P_LORA_Write(EE_LORA_ABP_HIGH16BIT_FCNT_ID, Fcnt);
+
+  HAL_FLASH_Lock();
+  /* USER CODE BEGIN E2P_Write_ABP_Fcnt_2 */
+
+  /* USER CODE END E2P_Write_ABP_Fcnt_2 */
+}
+
+
 uint8_t E2P_LORA_Read_Network_Type(void)
 {
   /* USER CODE BEGIN E2P_Read_Network_Type_1 */
@@ -390,6 +452,53 @@ void E2P_LORA_Write_Unconfirmed_Retrans(uint8_t NbTrans)
   /* USER CODE END E2P_Write_Unconfirmed_Retrans_2 */
 }
 
+
+void E2P_LORA_Read_DevAddr(uint8_t *pRDevAddr)
+{
+	 /* USER CODE BEGIN E2P_Read_Appeui_1 */
+  lora_u32 config_words;
+  uint8_t RDevAddr[4];
+
+  memset1(RDevAddr, 0, sizeof(RDevAddr));
+  /* USER CODE END E2P_Read_Appeui_1 */
+
+  E2P_LORA_Read(EE_LORA_WORD0_DEVADDR, (uint32_t *) &config_words);
+
+  /* USER CODE BEGIN E2P_Read_Appeui_2 */
+
+  	RDevAddr[0] = (uint8_t) (config_words >> 24);
+  	RDevAddr[1] = (uint8_t) (config_words >> 16);
+  	RDevAddr[2] = (uint8_t) (config_words >> 8);
+  	RDevAddr[3] = (uint8_t) (config_words);
+
+
+  memcpy1(pRDevAddr, RDevAddr, sizeof(RDevAddr));
+  /* USER CODE END E2P_Read_Appeui_2 */
+}
+
+void E2P_LORA_Write_DevAddr(uint8_t *pWDevAddr)
+{
+	/* USER CODE BEGIN E2P_Write_Appeui_1 */
+  lora_u32 config_words;
+  uint8_t WDevAddr[4];
+
+  memset1(WDevAddr, 0, sizeof(WDevAddr));
+  memcpy1(WDevAddr, pWDevAddr, sizeof(WDevAddr));
+
+
+  	config_words = (lora_u32) (WDevAddr[3] + (WDevAddr[2] << 8) + (WDevAddr[1] << 16) + (WDevAddr[0] << 24));
+  /* USER CODE END E2P_Write_Appeui_1 */
+
+  HAL_FLASH_Unlock();
+
+  E2P_LORA_Write(EE_LORA_WORD0_DEVADDR, config_words);
+
+  HAL_FLASH_Lock();
+
+  /* USER CODE BEGIN E2P_Write_Appeui_2 */
+
+  /* USER CODE END E2P_Write_Appeui_2 */
+}
 void E2P_LORA_Read_Appeui(uint8_t *pRappEui)
 {
   /* USER CODE BEGIN E2P_Read_Appeui_1 */

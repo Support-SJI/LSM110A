@@ -1261,6 +1261,13 @@ ATEerror_t AT_rc_set(const char *param)
   {
     sfx_rc_enum_t SgfxRcId = SFX_RC1;
     sfx_rc_t SgfxRc = RC1;
+	uint32_t ui32EnableRc = 0;
+	
+	ui32EnableRc = E2P_Read_Enable_Rc();
+	if(((ui32EnableRc >> SgfxRcId) & 0x00000001) == 0)
+	{
+		return AT_PARAM_ERROR;
+	}
 
     E2P_Write_Rc(SgfxRcId);
 
@@ -1279,6 +1286,13 @@ ATEerror_t AT_rc_set(const char *param)
 
     sfx_rc_enum_t SgfxRcId = SFX_RC2;
     sfx_rc_t SgfxRc = RC2;
+	uint32_t ui32EnableRc = 0;
+	
+	ui32EnableRc = E2P_Read_Enable_Rc();
+	if(((ui32EnableRc >> SgfxRcId) & 0x00000001) == 0)
+	{
+		return AT_PARAM_ERROR;
+	}
 
     E2P_Write_Rc(SgfxRcId);
 
@@ -1308,6 +1322,14 @@ ATEerror_t AT_rc_set(const char *param)
       sfx_rc_enum_t SgfxRcId = SFX_RC3A;
       sfx_rc_t SgfxRc = RC3A;
 
+	  uint32_t ui32EnableRc = 0;
+	  
+	  ui32EnableRc = E2P_Read_Enable_Rc();
+	  if(((ui32EnableRc >> SgfxRcId) & 0x00000001) == 0)
+	  {
+		  return AT_PARAM_ERROR;
+	  }
+
       E2P_Write_Rc(SgfxRcId);
 
       E2P_Read_ConfigWords(SgfxRcId, config_words);
@@ -1333,6 +1355,14 @@ ATEerror_t AT_rc_set(const char *param)
 
       sfx_rc_enum_t SgfxRcId = SFX_RC3C;
       sfx_rc_t SgfxRc = RC3C;
+
+	  uint32_t ui32EnableRc = 0;
+	  
+	  ui32EnableRc = E2P_Read_Enable_Rc();
+	  if(((ui32EnableRc >> SgfxRcId) & 0x00000001) == 0)
+	  {
+		  return AT_PARAM_ERROR;
+	  }
 
       E2P_Write_Rc(SgfxRcId);
 
@@ -1363,7 +1393,15 @@ ATEerror_t AT_rc_set(const char *param)
 
     sfx_rc_enum_t SgfxRcId = SFX_RC4;
     sfx_rc_t SgfxRc = RC4;
+
+	uint32_t ui32EnableRc = 0;
 	
+	ui32EnableRc = E2P_Read_Enable_Rc();
+	if(((ui32EnableRc >> SgfxRcId) & 0x00000001) == 0)
+	{
+		return AT_PARAM_ERROR;
+	}
+
     E2P_Write_Rc(SgfxRcId);
 
     E2P_Read_ConfigWords(SgfxRcId, config_words);
@@ -1390,6 +1428,14 @@ ATEerror_t AT_rc_set(const char *param)
     sfx_rc_enum_t SgfxRcId = SFX_RC5;
     sfx_rc_t SgfxRc = RC5;
 
+	uint32_t ui32EnableRc = 0;
+	
+	ui32EnableRc = E2P_Read_Enable_Rc();
+	if(((ui32EnableRc >> SgfxRcId) & 0x00000001) == 0)
+	{
+		return AT_PARAM_ERROR;
+	}
+
     E2P_Write_Rc(SgfxRcId);
 
     E2P_Read_ConfigWords(SgfxRcId, config_words);
@@ -1413,6 +1459,13 @@ ATEerror_t AT_rc_set(const char *param)
     sfx_rc_enum_t SgfxRcId = SFX_RC6;
     sfx_rc_t SgfxRc = RC6;
 
+	uint32_t ui32EnableRc = 0;
+	
+	ui32EnableRc = E2P_Read_Enable_Rc();
+	if(((ui32EnableRc >> SgfxRcId) & 0x00000001) == 0)
+	{
+		return AT_PARAM_ERROR;
+	}
 
     E2P_Write_Rc(SgfxRcId);
 
@@ -1431,6 +1484,14 @@ ATEerror_t AT_rc_set(const char *param)
   {
     sfx_rc_enum_t SgfxRcId = SFX_RC7;
     sfx_rc_t SgfxRc = RC7;
+
+	uint32_t ui32EnableRc = 0;
+	
+	ui32EnableRc = E2P_Read_Enable_Rc();
+	if(((ui32EnableRc >> SgfxRcId) & 0x00000001) == 0)
+	{
+		return AT_PARAM_ERROR;
+	}
 
     E2P_Write_Rc(SgfxRcId);
 

@@ -289,21 +289,24 @@ void GetUniqueId(uint8_t *id)
 
 uint32_t GetDevAddr(void)
 {
-  uint32_t val = 0;
-  /* USER CODE BEGIN GetDevAddr_1 */
+	uint32_t val = 0;
+	/* USER CODE BEGIN GetDevAddr_1 */
 
-  /* USER CODE END GetDevAddr_1 */
+	/* USER CODE END GetDevAddr_1 */
+	E2P_LORA_Read_DevAddr((uint8_t*)&val);
+	if (val == 0x08000000)
+	{
+		val = LL_FLASH_GetUDN();
+	}
+	if (val == 0xFFFFFFFF)
+	{
+		val = ((HAL_GetUIDw0()) ^ (HAL_GetUIDw1()) ^ (HAL_GetUIDw2()));
+	}
 
-  val = LL_FLASH_GetUDN();
-  if (val == 0xFFFFFFFF)
-  {
-    val = ((HAL_GetUIDw0()) ^ (HAL_GetUIDw1()) ^ (HAL_GetUIDw2()));
-  }
+	/* USER CODE BEGIN GetDevAddr_2 */
 
-  /* USER CODE BEGIN GetDevAddr_2 */
-
-  /* USER CODE END GetDevAddr_2 */
-  return val;
+	/* USER CODE END GetDevAddr_2 */
+	return val;
 
 }
 

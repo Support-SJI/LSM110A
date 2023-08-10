@@ -181,6 +181,7 @@ void E2P_RestoreFs(void)
   E2P_Write(EE_SGFX_MODE_ID, 0);                                //	0: Disable		1: enable
   E2P_Write(EE_FW_MODE_ID, 0);                                //	0: Disable		1: enable
 
+  E2P_Write(EE_SGFX_ENABLE_RC_ID, 18);
   HAL_FLASH_Lock();
 }
 
@@ -745,6 +746,14 @@ E2P_ErrorStatus_t E2P_Write_McuNvm(sfx_u8 *data_to_write, uint32_t len)
 }
 
 
+uint32_t E2P_Read_Enable_Rc(void)
+{
+  uint32_t ui32EnableRc = 0;
+
+  E2P_Read(EE_SGFX_ENABLE_RC_ID, &ui32EnableRc);
+
+  return ui32EnableRc;
+}
 /* USER CODE BEGIN EF */
 
 /* USER CODE END EF */

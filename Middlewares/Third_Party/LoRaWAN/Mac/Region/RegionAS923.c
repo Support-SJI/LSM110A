@@ -44,18 +44,55 @@
 // Definitions
 #define CHANNELS_MASK_SIZE                1
 
-#ifndef REGION_AS923_DEFAULT_CHANNEL_PLAN
-#define REGION_AS923_DEFAULT_CHANNEL_PLAN CHANNEL_PLAN_GROUP_AS923_1
-#endif
+//#ifndef REGION_AS923_DEFAULT_CHANNEL_PLAN
+//#define REGION_AS923_DEFAULT_CHANNEL_PLAN CHANNEL_PLAN_GROUP_AS923_1_JP
+//#endif
+uint8_t REGION_AS923_DEFAULT_CHANNEL_PLAN;
 
+uint32_t REGION_AS923_FREQ_OFFSET;
+uint32_t AS923_MIN_RF_FREQUENCY;
+uint32_t AS923_MAX_RF_FREQUENCY;
+
+
+uint8_t AS923_sub_band_setting (LoRaRegion_AS923_sub_band_t band)
+{
+	
+	if(band == sub_band_AS923_1_Customer)
+	{
+		AS923_PRINTF("Set AS923-1_Custom\r\n");
+		REGION_AS923_DEFAULT_CHANNEL_PLAN = CHANNEL_PLAN_GROUP_AS923_1;
+		REGION_AS923_FREQ_OFFSET = 0;
+		AS923_MIN_RF_FREQUENCY = 921800000;
+		AS923_MAX_RF_FREQUENCY = 923400000;
+	}
+	else if(band == sub_band_AS923_1)
+	{
+		AS923_PRINTF("Set AS923-1\r\n");
+		REGION_AS923_DEFAULT_CHANNEL_PLAN = CHANNEL_PLAN_GROUP_AS923_1;
+		REGION_AS923_FREQ_OFFSET = 0;
+		//AS923_MIN_RF_FREQUENCY = 921800000;
+		//AS923_MAX_RF_FREQUENCY = 923400000;
+		AS923_MIN_RF_FREQUENCY = 921500000;
+		AS923_MAX_RF_FREQUENCY = 928000000;
+	}
+	else
+	{
+		return 0;
+	}
+	return 1;
+}
+
+#define AS923_LBT_RX_BANDWIDTH            200000
+
+#if 0 //define band set
 #if( REGION_AS923_DEFAULT_CHANNEL_PLAN == CHANNEL_PLAN_GROUP_AS923_1 )
 
 // Channel plan CHANNEL_PLAN_GROUP_AS923_1
 
 #define REGION_AS923_FREQ_OFFSET          0
 
-#define AS923_MIN_RF_FREQUENCY            915000000
-#define AS923_MAX_RF_FREQUENCY            928000000
+#define AS923_MIN_RF_FREQUENCY            921800000
+#define AS923_MAX_RF_FREQUENCY            923400000
 
 #elif ( REGION_AS923_DEFAULT_CHANNEL_PLAN == CHANNEL_PLAN_GROUP_AS923_2 )
 
@@ -92,7 +129,7 @@
  * Specifies the reception bandwidth to be used while executing the LBT
  * Max channel bandwidth is 200 kHz
  */
-#define AS923_LBT_RX_BANDWIDTH            200000
+//#define AS923_LBT_RX_BANDWIDTH            200000
 
 #undef AS923_TX_MAX_DATARATE
 #define AS923_TX_MAX_DATARATE             DR_5
@@ -110,6 +147,8 @@
 #define AS923_DEFAULT_MAX_EIRP            13.0f
 
 #endif /* REGION_AS923_DEFAULT_CHANNEL_PLAN */
+
+#endif //define band set
 
 #if defined( REGION_AS923 )
 /*
@@ -455,13 +494,17 @@ void RegionAS923InitDefaults( InitDefaultsParams_t* params )
             // Default channels
             RegionNvmGroup2->Channels[0] = ( ChannelParams_t ) AS923_LC1;
             RegionNvmGroup2->Channels[1] = ( ChannelParams_t ) AS923_LC2;
+						RegionNvmGroup2->Channels[2] = ( ChannelParams_t ) AS923_LC3;
+						RegionNvmGroup2->Channels[3] = ( ChannelParams_t ) AS923_LC4;
 
             // Apply frequency offset
             RegionNvmGroup2->Channels[0].Frequency -= REGION_AS923_FREQ_OFFSET;
             RegionNvmGroup2->Channels[1].Frequency -= REGION_AS923_FREQ_OFFSET;
+						RegionNvmGroup2->Channels[2].Frequency -= REGION_AS923_FREQ_OFFSET;
+						RegionNvmGroup2->Channels[3].Frequency -= REGION_AS923_FREQ_OFFSET;
 
             // Default ChannelsMask
-            RegionNvmGroup2->ChannelsDefaultMask[0] = LC( 1 ) + LC( 2 );
+            RegionNvmGroup2->ChannelsDefaultMask[0] = LC( 1 ) + LC( 2 ) + LC( 3 ) + LC( 4 );
 
             // Update the channels mask
             RegionCommonChanMaskCopy( RegionNvmGroup2->ChannelsMask, RegionNvmGroup2->ChannelsDefaultMask, CHANNELS_MASK_SIZE );
@@ -472,6 +515,9 @@ void RegionAS923InitDefaults( InitDefaultsParams_t* params )
             // Reset Channels Rx1Frequency to default 0
             RegionNvmGroup2->Channels[0].Rx1Frequency = 0;
             RegionNvmGroup2->Channels[1].Rx1Frequency = 0;
+						RegionNvmGroup2->Channels[2].Rx1Frequency = 0;
+						RegionNvmGroup2->Channels[3].Rx1Frequency = 0;
+					
             // Update the channels mask
             RegionCommonChanMaskCopy( RegionNvmGroup2->ChannelsMask, RegionNvmGroup2->ChannelsDefaultMask, CHANNELS_MASK_SIZE );
             break;
@@ -1032,36 +1078,40 @@ LoRaMacStatus_t RegionAS923NextChannel( NextChanParams_t* nextChanParams, uint8_
 
     identifyChannelsParam.CountNbOfEnabledChannelsParam = &countChannelsParams;
 
-    status = RegionCommonIdentifyChannels( &identifyChannelsParam, aggregatedTimeOff, enabledChannels,
-                                           &nbEnabledChannels, &nbRestrictedChannels, time );
+    status = RegionCommonIdentifyChannels( &identifyChannelsParam, aggregatedTimeOff, enabledChannels, &nbEnabledChannels, &nbRestrictedChannels, time );
+																					 
+																					 
 
     if( status == LORAMAC_STATUS_OK )
     {
-#if ( REGION_AS923_DEFAULT_CHANNEL_PLAN == CHANNEL_PLAN_GROUP_AS923_1_JP )
-        // Executes the LBT algorithm when operating in Japan
-        uint8_t channelNext = 0;
+			if( REGION_AS923_DEFAULT_CHANNEL_PLAN == CHANNEL_PLAN_GROUP_AS923_1_JP )
+			{
+					// Executes the LBT algorithm when operating in Japan
+					uint8_t channelNext = 0;
 
-        for( uint8_t  i = 0, j = randr( 0, nbEnabledChannels - 1 ); i < AS923_MAX_NB_CHANNELS; i++ )
-        {
-            channelNext = enabledChannels[j];
-            j = ( j + 1 ) % nbEnabledChannels;
+					for( uint8_t  i = 0, j = randr( 0, nbEnabledChannels - 1 ); i < AS923_MAX_NB_CHANNELS; i++ )
+					{
+							channelNext = enabledChannels[j];
+							j = ( j + 1 ) % nbEnabledChannels;
 
-            // Perform carrier sense for AS923_CARRIER_SENSE_TIME
-            // If the channel is free, we can stop the LBT mechanism
-            if( Radio.IsChannelFree( RegionNvmGroup2->Channels[channelNext].Frequency, AS923_LBT_RX_BANDWIDTH, AS923_RSSI_FREE_TH, AS923_CARRIER_SENSE_TIME ) == true )
-            {
-                // Free channel found
-                *channel = channelNext;
-                return LORAMAC_STATUS_OK;
-            }
-        }
-        // Even if one or more channels are available according to the channel plan, no free channel
-        // was found during the LBT procedure.
-        status = LORAMAC_STATUS_NO_FREE_CHANNEL_FOUND;
-#else
-        // We found a valid channel
-        *channel = enabledChannels[randr( 0, nbEnabledChannels - 1 )];
-#endif
+							// Perform carrier sense for AS923_CARRIER_SENSE_TIME
+							// If the channel is free, we can stop the LBT mechanism
+							if( Radio.IsChannelFree( RegionNvmGroup2->Channels[channelNext].Frequency, AS923_LBT_RX_BANDWIDTH, AS923_RSSI_FREE_TH, AS923_CARRIER_SENSE_TIME ) == true )
+							{
+									// Free channel found
+									*channel = channelNext;
+									return LORAMAC_STATUS_OK;
+							}
+					}
+					// Even if one or more channels are available according to the channel plan, no free channel
+					// was found during the LBT procedure.
+					status = LORAMAC_STATUS_NO_FREE_CHANNEL_FOUND;
+				}
+				else
+				{
+					// We found a valid channel
+					*channel = enabledChannels[randr( 0, nbEnabledChannels - 1 )];
+				}
     }
     else if( status == LORAMAC_STATUS_NO_CHANNEL_FOUND )
     {

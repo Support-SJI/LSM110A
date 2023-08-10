@@ -35,7 +35,7 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* Exported defines ----------------------------------------------------------*/
-#define APP_SW_VERSION    "V0.0.27"	    // 2022.07.26 Modify HSE, Factory reset, FW Ver 1.0.1
+#define APP_SW_VERSION    "V0.0.31"	    // 2022.07.28 AS915band command standard, custom 1.0.3
 
 #ifdef FEATURE_SUPPORT_IAP_BOOTLOADER
 #define IAP_VERSION		  "V1.0.0"

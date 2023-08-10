@@ -114,6 +114,8 @@ static uint16_t RJcount0;
  */
 static LoRaMacCryptoNvmData_t* CryptoNvm;
 
+extern uint8_t flag;
+
 /*
  * Key-Address list
  */
@@ -842,6 +844,7 @@ static void ResetFCnts( void )
  */
 LoRaMacCryptoStatus_t LoRaMacCryptoInit( LoRaMacCryptoNvmData_t* nvm )
 {
+
     if( nvm == NULL )
     {
         return LORAMAC_CRYPTO_FAIL_PARAM;
@@ -858,10 +861,9 @@ LoRaMacCryptoStatus_t LoRaMacCryptoInit( LoRaMacCryptoNvmData_t* nvm )
     CryptoNvm->LrWanVersion.Fields.Minor = 1;
     CryptoNvm->LrWanVersion.Fields.Patch = 1;
     CryptoNvm->LrWanVersion.Fields.Revision = 0;
-
     // Reset frame counters
     ResetFCnts( );
-
+	
     return LORAMAC_CRYPTO_SUCCESS;
 }
 
@@ -877,7 +879,11 @@ LoRaMacCryptoStatus_t LoRaMacCryptoGetFCntUp( uint32_t* currentUp )
     {
         return LORAMAC_CRYPTO_ERROR_NPE;
     }
-
+	if(flag == 1)
+	{
+		CryptoNvm->FCntList.FCntUp = E2P_LORA_Read_ABP_Fcnt();
+	}
+	flag = 0;
     *currentUp = CryptoNvm->FCntList.FCntUp + 1;
 
     return LORAMAC_CRYPTO_SUCCESS;
@@ -949,6 +955,8 @@ LoRaMacCryptoStatus_t LoRaMacCryptoGetFCntDown( FCntIdentifier_t fCntID, uint32_
     }
 
     cryptoStatus = GetLastFcntDown( fCntID, &lastDown );
+		uint32_t high16bit_DL_Fcnt = E2P_LORA_Read_ABP_High16bit_DL_Fcnt();
+		
     if( cryptoStatus != LORAMAC_CRYPTO_SUCCESS )
     {
         return cryptoStatus;
@@ -957,25 +965,31 @@ LoRaMacCryptoStatus_t LoRaMacCryptoGetFCntDown( FCntIdentifier_t fCntID, uint32_
     // For LoRaWAN 1.0.X only, allow downlink frames of 0
     if( lastDown == FCNT_DOWN_INITAL_VALUE )
     {
-        *currentDown = frameFcnt;
+        *currentDown = frameFcnt | high16bit_DL_Fcnt;;
     }
+		
     else
     {
+			
         // Add difference, consider roll-over
         fCntDiff = ( int32_t )( ( int64_t )frameFcnt - ( int64_t )( lastDown & 0x0000FFFF ) );
+				
+				lastDown = lastDown | high16bit_DL_Fcnt;
 
         if( fCntDiff > 0 )
         {  // Positive difference
-            *currentDown = lastDown + fCntDiff;
+          *currentDown = lastDown + fCntDiff;
         }
         else if( fCntDiff == 0 )
         {  // Duplicate FCnt value, keep the current value.
-            *currentDown = lastDown;
-            return LORAMAC_CRYPTO_FAIL_FCNT_DUPLICATED;
+          *currentDown = lastDown;
+          return LORAMAC_CRYPTO_FAIL_FCNT_DUPLICATED;
         }
         else
         {  // Negative difference, assume a roll-over of one uint16_t
-            *currentDown = ( lastDown & 0xFFFF0000 ) + 0x10000 + frameFcnt;
+					high16bit_DL_Fcnt += 0x10000;
+					E2P_LORA_Write_ABP_High16bit_DL_Fcnt(high16bit_DL_Fcnt);
+					*currentDown = high16bit_DL_Fcnt | frameFcnt;
         }
     }
 
@@ -1446,8 +1460,8 @@ LoRaMacCryptoStatus_t LoRaMacCryptoSecureMessage( uint32_t fCntUp, uint8_t txDr,
     {
         return LORAMAC_CRYPTO_ERROR_SERIALIZER;
     }
-
-    CryptoNvm->FCntList.FCntUp = fCntUp;
+	
+	CryptoNvm->FCntList.FCntUp = fCntUp;
 
     return LORAMAC_CRYPTO_SUCCESS;
 }

@@ -57,6 +57,7 @@
 #include "LoRaMac.h"
 #include "mw_log_conf.h"
 
+
 #if (defined( LORAMAC_VERSION ) && (( LORAMAC_VERSION == 0x01000300 ) || ( LORAMAC_VERSION == 0x01000400 )))
 #else
 #error LORAMAC_VERSION not valid
@@ -305,6 +306,8 @@ typedef struct sLoRaMacCtx
  * Module context.
  */
 static LoRaMacCtx_t MacCtx;
+
+uint8_t flag = 0;
 
 #if defined(__ICCARM__)
 __NO_INIT __ROOT static LoRaMacNvmData_t Nvm @ ".LW_NVM_RAM";
@@ -2272,9 +2275,11 @@ static void OnRetransmitTimeoutTimerEvent( void* context )
 static LoRaMacCryptoStatus_t GetFCntDown( AddressIdentifier_t addrID, FType_t fType, LoRaMacMessageData_t* macMsg, Version_t lrWanVersion,
                                           FCntIdentifier_t* fCntID, uint32_t* currentDown )
 {
+
     if( ( macMsg == NULL ) || ( fCntID == NULL ) ||
         ( currentDown == NULL ) )
     {
+
         return LORAMAC_CRYPTO_ERROR_NPE;
     }
 
@@ -2323,7 +2328,6 @@ static LoRaMacCryptoStatus_t GetFCntDown( AddressIdentifier_t addrID, FType_t fT
         default:
             return LORAMAC_CRYPTO_FAIL_FCNT_ID;
     }
-
     return LoRaMacCryptoGetFCntDown( *fCntID, macMsg->FHDR.FCnt, currentDown );
 }
 #endif /* LORAMAC_VERSION */
@@ -3228,7 +3232,7 @@ static LoRaMacStatus_t SecureFrame( uint8_t txDr, uint8_t txCh )
 {
     LoRaMacCryptoStatus_t macCryptoStatus = LORAMAC_CRYPTO_ERROR;
     uint32_t fCntUp = 0;
-
+	
     switch( MacCtx.TxMsg.Type )
     {
         case LORAMAC_MSG_TYPE_JOIN_REQUEST:
@@ -3239,7 +3243,12 @@ static LoRaMacStatus_t SecureFrame( uint8_t txDr, uint8_t txCh )
             }
             MacCtx.PktBufferLen = MacCtx.TxMsg.Message.JoinReq.BufSize;
             break;
-        case LORAMAC_MSG_TYPE_DATA:
+        case LORAMAC_MSG_TYPE_DATA:	
+
+			if(Nvm.MacGroup2.NetworkActivation == ACTIVATION_TYPE_ABP)
+			{
+				flag = 1;
+			}
 
             if( LORAMAC_CRYPTO_SUCCESS != LoRaMacCryptoGetFCntUp( &fCntUp ) )
             {
@@ -3256,6 +3265,12 @@ static LoRaMacStatus_t SecureFrame( uint8_t txDr, uint8_t txCh )
             }
 
             macCryptoStatus = LoRaMacCryptoSecureMessage( fCntUp, txDr, txCh, &MacCtx.TxMsg.Message.Data );
+			
+						if(Nvm.MacGroup2.NetworkActivation == ACTIVATION_TYPE_ABP)
+						{
+							E2P_LORA_Write_ABP_Fcnt(fCntUp);
+						}
+
             if( LORAMAC_CRYPTO_SUCCESS != macCryptoStatus )
             {
                 return LORAMAC_STATUS_CRYPTO_ERROR;

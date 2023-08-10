@@ -37,6 +37,7 @@
 #include "flash_if.h"
 #include "lora_eeprom_if.h"
 #include "sgfx_eeprom_if.h"
+#include "RegionAS923.h"
 
 
 /* USER CODE BEGIN Includes */
@@ -303,17 +304,6 @@ void AT_event_receive(int flag, LmHandlerAppData_t *appData, LmHandlerRxParams_t
         AT_PRINTF("%02X", appData->Buffer[i]);
       }
       AT_PRINTF("\r\n");
-	  
-	  if(flag == 1) //If Confirmed Data Received
-	  {
-		appData->Port = 0xFF;
-	  	appData->Buffer = NULL;
-		appData->BufferSize = 0;
-		
-		AT_PRINTF("+EVT:UNCONFIRMED UPLINK\r\n");	
-		
-	  	LmHandlerSend(appData, LORAMAC_HANDLER_UNCONFIRMED_MSG, true);	
-	  }
     }
   }
 
@@ -449,15 +439,10 @@ ATEerror_t AT_restore_factory_settings_l(const char *param)
 
   /* USER CODE END AT_restore_factory_settings_1 */
   /* store nvm in flash */
-  if (HAL_FLASH_Unlock() == HAL_OK)
-  {
-    if (FLASH_IF_EraseByPages(PAGE(EE_LORA_BASE_ADRESS), 1, 0U) == FLASH_OK)
-    {
-      /* System Reboot*/
-      NVIC_SystemReset();
-    }
-    HAL_FLASH_Lock();
-  }
+
+  E2P_LORA_RestoreFs();
+  NVIC_SystemReset();
+
   return AT_OK;
   /* USER CODE BEGIN AT_restore_factory_settings_2 */
 
@@ -736,6 +721,7 @@ ATEerror_t AT_NwkSKey_set(const char *param)
   }
   
   E2P_LORA_Write_Nwk_S_key(nwkSKey);
+	E2P_LORA_Write_ABP_High16bit_DL_Fcnt(0);
 
   return AT_OK;
   /* USER CODE BEGIN AT_NwkSKey_set_2 */
@@ -779,6 +765,7 @@ ATEerror_t AT_AppSKey_set(const char *param)
   }
   
   E2P_LORA_Write_App_S_key(appSKey);
+	E2P_LORA_Write_ABP_High16bit_DL_Fcnt(0);
 
   return AT_OK;
   /* USER CODE BEGIN AT_AppSKey_set_2 */
@@ -819,7 +806,10 @@ ATEerror_t AT_DevAddr_set(const char *param)
   {
     return AT_ERROR;
   }
-
+	
+	E2P_LORA_Write_DevAddr((uint8_t*)&devAddr);
+	E2P_LORA_Write_ABP_High16bit_DL_Fcnt(0);
+	
   return AT_OK;
   /* USER CODE BEGIN AT_DevAddr_set_2 */
 
@@ -1055,7 +1045,6 @@ ATEerror_t AT_Send(const char *param)
   AppData.Port = appPort;
 
   lmhStatus = LmHandlerSend(&AppData, isTxConfirmed, false);
-
   switch (lmhStatus)
   {
     case LORAMAC_HANDLER_SUCCESS:
@@ -1230,7 +1219,12 @@ ATEerror_t AT_Region_set(const char *param)
 
   /* USER CODE END AT_Region_set_1 */
   LoRaMacRegion_t region;
-  if (tiny_sscanf(param, "%hhu", &region) != 1)
+	LoRaRegion_AS923_sub_band_t AS923_sub_band = sub_band_AS923_1;
+	uint8_t parameter_num=0;
+	
+	
+	parameter_num=tiny_sscanf(param, "%hhu,%hhu",&region,&AS923_sub_band);
+	if (parameter_num == 0 && parameter_num > 3)
   {
     return AT_PARAM_ERROR;
   }
@@ -1242,8 +1236,17 @@ ATEerror_t AT_Region_set(const char *param)
   {
     return AT_PARAM_ERROR;
   }
+	if(region == LORAMAC_REGION_AS923)
+	{
+		AT_PRINTF("sub_band_AS923_1: %d \r\n",AS923_sub_band);
+		if(AS923_sub_band_setting(AS923_sub_band) ==  0)
+		{
+			return AT_PARAM_ERROR;
+		}
+	}
   if (LmHandlerSetActiveRegion(region) != LORAMAC_HANDLER_SUCCESS)
   {
+		AT_PRINTF("LORAMAC_HANDLER_SUCCESS \r\n");
     return AT_PARAM_ERROR;
   }
 
@@ -1817,6 +1820,47 @@ ATEerror_t AT_DevNonce_set(const char *param)
   /* USER CODE END AT_DevNonce_set_2 */
 }
 
+ATEerror_t AT_ABP_Fcnt_get(const char *param)
+{
+  /* USER CODE BEGIN AT_ABP_Fcnt_get_1 */
+
+  /* USER CODE END AT_ABP_Fcnt_get_1 */
+  uint32_t Fcnt;
+  Fcnt = E2P_LORA_Read_ABP_Fcnt();
+
+  print_u(Fcnt);
+  return AT_OK;
+  /* USER CODE BEGIN AT_ABP_Fcnt_get_2 */
+	
+  /* USER CODE END AT_ABP_Fcnt_get_2 */
+}
+
+ATEerror_t AT_ABP_Fcnt_set(const char *param)
+{
+  /* USER CODE BEGIN AT_ABP_Fcnt_set_1 */
+
+  /* USER CODE END AT_ABP_Fcnt_set_1 */
+  uint32_t Fcnt = 0;
+
+  if(tiny_sscanf(param, "%u", &Fcnt) != 1)
+  {
+	return AT_PARAM_ERROR;
+  }
+  if(Fcnt == 0)
+  {
+	E2P_LORA_Write_ABP_Fcnt(Fcnt);
+  }
+  else
+  {
+	print_u(Fcnt);
+	E2P_LORA_Write_ABP_Fcnt(Fcnt);
+  }
+
+  return AT_OK;
+  /* USER CODE BEGIN AT_ABP_Fcnt_set_2 */
+
+  /* USER CODE END AT_ABP_Fcnt_set_2 */
+}
 ATEerror_t AT_Confirmed_Retransmission_get(const char *param)
 {
   /* USER CODE BEGIN AT_Confirmed_Retransmission_count_get_1 */
@@ -2930,6 +2974,8 @@ ATEerror_t AT_sw_version_get_l(const char *param)
   AT_PPRINTF("SW_VERSION: %s\r\n", APP_SW_VERSION);
   return AT_OK;
 }
+
+
 /* USER CODE END EF */
 
 /* Private Functions Definition -----------------------------------------------*/
@@ -3130,6 +3176,8 @@ static int32_t isHex(char Char)
 
   /* USER CODE END isHex_2 */
 }
+
+
 
 /* USER CODE BEGIN PrFD */
 

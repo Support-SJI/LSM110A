@@ -104,6 +104,7 @@ typedef enum
   EE_SGFX_ENCRYPTIONFLAG_ID,
   EE_SGFX_VERBOSELEVEL_ID,
   EE_SGFX_MODE_ID,
+  EE_SGFX_ENABLE_RC_ID,
   EE_FW_MODE_ID,
   EE_ID_COUNT,
 } e_EE_ID;
@@ -290,6 +291,7 @@ void E2P_Write_Mode(uint8_t SgfxMode);
 uint8_t E2P_FW_Read_Mode(void);
 void E2P_FW_Write_Mode(uint8_t SgfxMode);
 
+uint32_t E2P_Read_Enable_Rc(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

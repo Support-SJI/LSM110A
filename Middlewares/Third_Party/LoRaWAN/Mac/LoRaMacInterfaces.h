@@ -995,6 +995,17 @@ typedef enum eLoRaMacRegion
     LORAMAC_REGION_RU864,
 }LoRaMacRegion_t;
 
+typedef enum eLoRaRegion_AS923_sub_band
+{
+	sub_band_AS923_1_Customer = 0,
+	sub_band_AS923_1,
+	sub_band_AS923_2,
+	sub_band_AS923_3,
+	sub_band_AS923_1_JP,
+}LoRaRegion_AS923_sub_band_t;
+
+
+
 typedef struct sLoRaMacNvmDataGroup1
 {
     /*!

@@ -79,8 +79,11 @@ typedef enum
   EE_LORA_DEVNONCE_ID,
   EE_LORA_CONFIRMNBTRANS_ID,
   EE_LORA_UNCONFIRMNBTRANS_ID,
+  EE_LORA_ABP_FCNT_ID,
   
   EE_LORA_ID_COUNT,
+	EE_LORA_WORD0_DEVADDR,
+	EE_LORA_ABP_HIGH16BIT_FCNT_ID,
 } e_EE_LORA_ID;
 
 /* USER CODE BEGIN EV */
@@ -125,6 +128,12 @@ void E2P_LORA_Write_Mode(uint8_t LoRaMode);
 uint16_t E2P_LORA_Read_DevNonce(void);
 void E2P_LORA_Write_DevNonce(uint16_t DevNonce);
 
+uint32_t E2P_LORA_Read_ABP_Fcnt(void);
+void E2P_LORA_Write_ABP_Fcnt(uint32_t Fcnt);
+
+uint32_t E2P_LORA_Read_ABP_High16bit_DL_Fcnt(void);
+void E2P_LORA_Write_ABP_High16bit_DL_Fcnt(uint32_t Fcnt);
+
 uint8_t E2P_LORA_Read_Network_Type(void);
 void E2P_LORA_Write_Network_Type(uint8_t NetworkType);
 
@@ -133,6 +142,9 @@ void E2P_LORA_Write_Confirmed_Retrans(uint8_t UnconNbTrans);
 
 uint8_t E2P_LORA_Read_Unconfirmed_Retrans(void);
 void E2P_LORA_Write_Unconfirmed_Retrans(uint8_t UnconNbTrans);
+
+void E2P_LORA_Read_DevAddr(uint8_t *pRDevAddr);
+void E2P_LORA_Write_DevAddr(uint8_t *pWDevAddr);
 
 void E2P_LORA_Read_Appeui(uint8_t *pRappEui);
 void E2P_LORA_Write_Appeui(uint8_t *pWappEui);

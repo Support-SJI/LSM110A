@@ -1086,18 +1086,20 @@ static void McpsIndication( McpsIndication_t *mcpsIndication, LoRaMacRxStatus_t 
     appData.BufferSize = mcpsIndication->BufferSize;
     appData.Buffer = mcpsIndication->Buffer;
 
-	if(mcpsIndication->McpsIndication == MCPS_UNCONFIRMED)
-	{
+		if(mcpsIndication->McpsIndication == MCPS_UNCONFIRMED)
+		{
     	LmHandlerCallbacks->OnRxData(0, &appData, &RxParams );
-	}
-	else if(mcpsIndication->McpsIndication == MCPS_CONFIRMED)
-	{
-		LmHandlerCallbacks->OnRxData(1, &appData, &RxParams );
-	}
-	else
-	{
-		LmHandlerCallbacks->OnRxData(-1, &appData, &RxParams );
-	}
+		}
+		else if(mcpsIndication->McpsIndication == MCPS_CONFIRMED)
+		{
+			LmHandlerCallbacks->OnRxData(1, &appData, &RxParams );
+		}
+		else
+		{
+			LmHandlerCallbacks->OnRxData(-1, &appData, &RxParams );
+		}
+		
+		
     if ((LmHandlerCallbacks->OnSysTimeUpdate != NULL) && (mcpsIndication->DeviceTimeAnsReceived == true))
     {
         LmHandlerCallbacks->OnSysTimeUpdate( );
@@ -2009,7 +2011,6 @@ LmHandlerErrorStatus_t LmHandlerSetUnconfirmedRetrans(uint8_t NbTrans)
 
     return LORAMAC_HANDLER_SUCCESS;
 }
-
 LmHandlerErrorStatus_t LmHandlerGetPingPeriodicity(uint8_t *pingPeriodicity)
 {
 #if ( LORAMAC_CLASSB_ENABLED == 1 )

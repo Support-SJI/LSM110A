@@ -651,6 +651,7 @@ static const struct ATCommand_s ATCommand[] =
 	.run = AT_return_error_l,
   },
 
+
   {
   	.string = AT_NWKTYPE,
 	.size_string = sizeof(AT_NWKTYPE) - 1,
@@ -692,6 +693,18 @@ static const struct ATCommand_s ATCommand[] =
 #endif /* !NO_HELP */
 	.get = AT_Unconfirmed_Retransmission_get,
 	.set = AT_Unconfirmed_Retransmission_set,
+	.run = AT_return_error_l,
+  },
+
+  
+  {
+  	.string = AT_ABPFCNT,
+	.size_string = sizeof(AT_ABPFCNT) - 1,
+#ifndef NO_HELP
+	.help_string = "AT"AT_ABPFCNT"=?<CR>. Get the ABP Frame count\r\n",
+#endif /* !NO_HELP */
+	.get = AT_ABP_Fcnt_get,
+	.set = AT_ABP_Fcnt_set,
 	.run = AT_return_error_l,
   },
 };
