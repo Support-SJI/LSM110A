@@ -50,8 +50,8 @@
 uint8_t REGION_AS923_DEFAULT_CHANNEL_PLAN;
 
 uint32_t REGION_AS923_FREQ_OFFSET;
-uint32_t AS923_MIN_RF_FREQUENCY;
-uint32_t AS923_MAX_RF_FREQUENCY;
+uint32_t AS923_MIN_RF_FREQUENCY = 921500000;
+uint32_t AS923_MAX_RF_FREQUENCY = 928000000;
 
 
 uint8_t AS923_sub_band_setting (LoRaRegion_AS923_sub_band_t band)
@@ -494,17 +494,19 @@ void RegionAS923InitDefaults( InitDefaultsParams_t* params )
             // Default channels
             RegionNvmGroup2->Channels[0] = ( ChannelParams_t ) AS923_LC1;
             RegionNvmGroup2->Channels[1] = ( ChannelParams_t ) AS923_LC2;
-						RegionNvmGroup2->Channels[2] = ( ChannelParams_t ) AS923_LC3;
-						RegionNvmGroup2->Channels[3] = ( ChannelParams_t ) AS923_LC4;
+						for(int i=2;i<REGION_NVM_MAX_NB_CHANNELS;i++)
+						{
+							ChannelParams_t channelN = AS923_LC1;
+							channelN.Frequency = channelN.Frequency + (200000*i);
+							RegionNvmGroup2->Channels[i] = channelN;
+						}
 
             // Apply frequency offset
             RegionNvmGroup2->Channels[0].Frequency -= REGION_AS923_FREQ_OFFSET;
             RegionNvmGroup2->Channels[1].Frequency -= REGION_AS923_FREQ_OFFSET;
-						RegionNvmGroup2->Channels[2].Frequency -= REGION_AS923_FREQ_OFFSET;
-						RegionNvmGroup2->Channels[3].Frequency -= REGION_AS923_FREQ_OFFSET;
 
             // Default ChannelsMask
-            RegionNvmGroup2->ChannelsDefaultMask[0] = LC( 1 ) + LC( 2 ) + LC( 3 ) + LC( 4 );
+            RegionNvmGroup2->ChannelsDefaultMask[0] = LC( 1 ) + LC( 2 );
 
             // Update the channels mask
             RegionCommonChanMaskCopy( RegionNvmGroup2->ChannelsMask, RegionNvmGroup2->ChannelsDefaultMask, CHANNELS_MASK_SIZE );
@@ -515,9 +517,6 @@ void RegionAS923InitDefaults( InitDefaultsParams_t* params )
             // Reset Channels Rx1Frequency to default 0
             RegionNvmGroup2->Channels[0].Rx1Frequency = 0;
             RegionNvmGroup2->Channels[1].Rx1Frequency = 0;
-						RegionNvmGroup2->Channels[2].Rx1Frequency = 0;
-						RegionNvmGroup2->Channels[3].Rx1Frequency = 0;
-					
             // Update the channels mask
             RegionCommonChanMaskCopy( RegionNvmGroup2->ChannelsMask, RegionNvmGroup2->ChannelsDefaultMask, CHANNELS_MASK_SIZE );
             break;

@@ -89,7 +89,7 @@ extern "C"
 /*!
  * Number of default channels
  */
-#define AS923_NUMB_DEFAULT_CHANNELS                 4			//2 -> 4
+#define AS923_NUMB_DEFAULT_CHANNELS                 2
 
 /*!
  * Number of channels to apply for the CF list
@@ -270,20 +270,6 @@ extern "C"
  * Channel = { Frequency [Hz], RX1 Frequency [Hz], { ( ( DrMax << 4 ) | DrMin ) }, Band }
  */
 #define AS923_LC2                                   { 923400000, 0, { ( ( DR_5 << 4 ) | DR_0 ) }, 0 }
-
-
-//ysjung add
-/*!
- * LoRaMac default channel 3
- * Channel = { Frequency [Hz], RX1 Frequency [Hz], { ( ( DrMax << 4 ) | DrMin ) }, Band }
- */
-#define AS923_LC3                                   { 922100000, 0, { ( ( DR_6 << 4 ) | DR_6 ) }, 0 }
-
-/*!
- * LoRaMac default channel 4
- * Channel = { Frequency [Hz], RX1 Frequency [Hz], { ( ( DrMax << 4 ) | DrMin ) }, Band }
- */
-#define AS923_LC4                                   { 921800000, 0, { ( ( DR_7 << 4 ) | DR_7 ) }, 0 }
 
 /*!
  * LoRaMac channels which are allowed for the join procedure
